@@ -16,6 +16,7 @@ SDL_Renderer *renderer = NULL;
 
 bool init();
 void close();
+void draw_pixel(int x, int y);
 
 int main()
 {
@@ -27,15 +28,16 @@ int main()
   else
   {
     bool quit = false;
-    int flag = 0;
 
     SDL_Event e;
     SDL_zero(e);
 
     int iterations = 0;
+    int x = 0;
 
     while (quit == false)
     {
+      iterations++;
       while (SDL_PollEvent(&e) == true)
       {
         if (e.type == SDL_EVENT_QUIT)
@@ -47,33 +49,21 @@ int main()
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
       SDL_RenderClear(renderer);
 
-      int y = 0;
-      if (flag == 1)
+      for (int offset = 5; offset < 50; offset += 5)
       {
-        y = 1;
-      }
-
-      for (; y < PIXEL_GRID_HEIGHT; y += 2)
-      {
-        int x = 0;
-        if (flag == 1)
+        for (int y = 0; y < PIXEL_GRID_HEIGHT; y++)
         {
-          x = 1;
-        }
-        for (; x < PIXEL_GRID_WIDTH; x += 2)
-        {
-          SDL_FRect rect = (SDL_FRect){.x = x * TRANSLATION_FACTOR, .y = y * TRANSLATION_FACTOR, .w = TRANSLATION_FACTOR, .h = TRANSLATION_FACTOR};
+          SDL_FRect rect = (SDL_FRect){.x = ((x + y + offset) % PIXEL_GRID_WIDTH) * TRANSLATION_FACTOR, .y = y * TRANSLATION_FACTOR, .w = TRANSLATION_FACTOR, .h = TRANSLATION_FACTOR};
           SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
           SDL_RenderFillRect(renderer, &rect);
         }
       }
 
       SDL_RenderPresent(renderer);
-      if (iterations % 200 == 0)
+      if (iterations % 25 == 0)
       {
-        flag = 1 - flag;
+        x = (x + 1) % PIXEL_GRID_WIDTH;
       }
-      iterations++;
     }
 
     close();
@@ -125,4 +115,11 @@ void close()
   window = NULL;
   renderer = NULL;
   SDL_Quit();
+}
+
+void draw_pixel(int x, int y)
+{
+  SDL_FRect rect = (SDL_FRect){.x = x * TRANSLATION_FACTOR, .y = y * TRANSLATION_FACTOR, .w = TRANSLATION_FACTOR, .h = TRANSLATION_FACTOR};
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderFillRect(renderer, &rect);
 }
