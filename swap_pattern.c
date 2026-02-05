@@ -2,12 +2,16 @@
 #include <string.h>
 #include <stdbool.h>
 
-const static int width = 1024;
-const static int height = 512;
+#define PIXEL_GRID_WIDTH 64
+#define PIXEL_GRID_HEIGHT 32
+#define TRANSLATION_FACTOR 16
+
+#define WINDOW_WIDTH (PIXEL_GRID_WIDTH * TRANSLATION_FACTOR)
+#define WINDOW_HEIGHT (PIXEL_GRID_HEIGHT * TRANSLATION_FACTOR)
+
+typedef bool PixelGrid[PIXEL_GRID_WIDTH][PIXEL_GRID_HEIGHT];
 
 SDL_Window *window = NULL;
-SDL_Surface *hello_world = NULL;
-SDL_FRect rect;
 SDL_Renderer *renderer = NULL;
 
 bool init();
@@ -37,28 +41,18 @@ int main()
         }
       }
 
-      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
       SDL_RenderClear(renderer);
 
-      rect = (SDL_FRect){.x = 0, .y = 0, .w = 16, .h = 16};
-      SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-      SDL_RenderRect(renderer, &rect);
-      SDL_RenderFillRect(renderer, &rect);
-
-      rect = (SDL_FRect){.x = 0, .y = 16, .w = 16, .h = 16};
-      SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-      SDL_RenderRect(renderer, &rect);
-      SDL_RenderFillRect(renderer, &rect);
-
-      rect = (SDL_FRect){.x = 0, .y = 16, .w = 16, .h = 16};
-      SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-      SDL_RenderRect(renderer, &rect);
-      SDL_RenderFillRect(renderer, &rect);
-
-      rect = (SDL_FRect){.x = 16, .y = 0, .w = 16, .h = 16};
-      SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-      SDL_RenderRect(renderer, &rect);
-      SDL_RenderFillRect(renderer, &rect);
+      for (int r = 0; r < PIXEL_GRID_HEIGHT; r += 2)
+      {
+        for (int c = 0; c < PIXEL_GRID_WIDTH; c += 2)
+        {
+          SDL_Rect rect = (SDL_Rect){.x = c * TRANSLATION_FACTOR, .y = r * TRANSLATION_FACTOR, .w = TRANSLATION_FACTOR, .h = TRANSLATION_FACTOR};
+          SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+          SDL_RenderFillRect(renderer, &rect);
+        }
+      }
 
       SDL_RenderPresent(renderer);
     }
@@ -77,7 +71,7 @@ bool init()
   }
   else
   {
-    window = SDL_CreateWindow("SDL3 Tutorial: Hello SDL3", width, height, 0);
+    window = SDL_CreateWindow("SDL3 Tutorial: Hello SDL3", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     if (window == NULL)
     {
       SDL_Log("Window could not be created! SDL error: %s\n", SDL_GetError());
@@ -91,6 +85,14 @@ bool init()
         SDL_Log("Could not create renderer! SDL error: %s\n", SDL_GetError());
         return false;
       }
+      else
+      {
+        SDL_SetRenderLogicalPresentation(
+            renderer,
+            WINDOW_WIDTH,
+            WINDOW_HEIGHT,
+            SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
+      }
     }
   }
 
@@ -100,6 +102,7 @@ bool init()
 void close()
 {
   SDL_DestroyWindow(window);
+  SDL_DestroyRenderer(renderer);
   window = NULL;
   renderer = NULL;
   SDL_Quit();
