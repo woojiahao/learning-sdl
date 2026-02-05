@@ -2,15 +2,15 @@
 #include <string.h>
 #include <stdbool.h>
 
-const static int width = 640;
-const static int height = 480;
+const static int width = 1024;
+const static int height = 512;
 
 SDL_Window *window = NULL;
-SDL_Surface *surface = NULL;
 SDL_Surface *hello_world = NULL;
+SDL_FRect rect;
+SDL_Renderer *rect_renderer = NULL;
 
 bool init();
-bool load_media();
 void close();
 
 int main()
@@ -37,8 +37,30 @@ int main()
         }
       }
 
-      SDL_FillSurfaceRect(surface, NULL, SDL_MapSurfaceRGB(surface, 0xFF, 0xFF, 0xFF));
-      SDL_UpdateWindowSurface(window);
+      SDL_SetRenderDrawColor(rect_renderer, 255, 255, 255, 255);
+      SDL_RenderClear(rect_renderer);
+
+      rect = (SDL_FRect){.x = 0, .y = 0, .w = 16, .h = 16};
+      SDL_SetRenderDrawColor(rect_renderer, 255, 0, 0, 255);
+      SDL_RenderRect(rect_renderer, &rect);
+      SDL_RenderFillRect(rect_renderer, &rect);
+
+      rect = (SDL_FRect){.x = 0, .y = 16, .w = 16, .h = 16};
+      SDL_SetRenderDrawColor(rect_renderer, 0, 255, 0, 255);
+      SDL_RenderRect(rect_renderer, &rect);
+      SDL_RenderFillRect(rect_renderer, &rect);
+
+      rect = (SDL_FRect){.x = 0, .y = 16, .w = 16, .h = 16};
+      SDL_SetRenderDrawColor(rect_renderer, 0, 255, 0, 255);
+      SDL_RenderRect(rect_renderer, &rect);
+      SDL_RenderFillRect(rect_renderer, &rect);
+
+      rect = (SDL_FRect){.x = 16, .y = 0, .w = 16, .h = 16};
+      SDL_SetRenderDrawColor(rect_renderer, 0, 0, 255, 255);
+      SDL_RenderRect(rect_renderer, &rect);
+      SDL_RenderFillRect(rect_renderer, &rect);
+
+      SDL_RenderPresent(rect_renderer);
     }
 
     close();
@@ -63,7 +85,12 @@ bool init()
     }
     else
     {
-      surface = SDL_GetWindowSurface(window);
+      rect_renderer = SDL_CreateRenderer(window, NULL);
+      if (rect_renderer == NULL)
+      {
+        SDL_Log("Could not create renderer! SDL error: %s\n", SDL_GetError());
+        return false;
+      }
     }
   }
 
@@ -74,6 +101,6 @@ void close()
 {
   SDL_DestroyWindow(window);
   window = NULL;
-  surface = NULL;
+  rect_renderer = NULL;
   SDL_Quit();
 }
