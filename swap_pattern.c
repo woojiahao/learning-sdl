@@ -27,9 +27,12 @@ int main()
   else
   {
     bool quit = false;
+    int flag = 0;
 
     SDL_Event e;
     SDL_zero(e);
+
+    int iterations = 0;
 
     while (quit == false)
     {
@@ -44,17 +47,33 @@ int main()
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
       SDL_RenderClear(renderer);
 
-      for (int r = 0; r < PIXEL_GRID_HEIGHT; r += 2)
+      int y = 0;
+      if (flag == 1)
       {
-        for (int c = 0; c < PIXEL_GRID_WIDTH; c += 2)
+        y = 1;
+      }
+
+      for (; y < PIXEL_GRID_HEIGHT; y += 2)
+      {
+        int x = 0;
+        if (flag == 1)
         {
-          SDL_Rect rect = (SDL_Rect){.x = c * TRANSLATION_FACTOR, .y = r * TRANSLATION_FACTOR, .w = TRANSLATION_FACTOR, .h = TRANSLATION_FACTOR};
+          x = 1;
+        }
+        for (; x < PIXEL_GRID_WIDTH; x += 2)
+        {
+          SDL_FRect rect = (SDL_FRect){.x = x * TRANSLATION_FACTOR, .y = y * TRANSLATION_FACTOR, .w = TRANSLATION_FACTOR, .h = TRANSLATION_FACTOR};
           SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
           SDL_RenderFillRect(renderer, &rect);
         }
       }
 
       SDL_RenderPresent(renderer);
+      if (iterations % 200 == 0)
+      {
+        flag = 1 - flag;
+      }
+      iterations++;
     }
 
     close();
@@ -71,7 +90,7 @@ bool init()
   }
   else
   {
-    window = SDL_CreateWindow("SDL3 Tutorial: Hello SDL3", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    window = SDL_CreateWindow("SDL3 Tutorial: Hello SDL3", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_OPENGL);
     if (window == NULL)
     {
       SDL_Log("Window could not be created! SDL error: %s\n", SDL_GetError());
